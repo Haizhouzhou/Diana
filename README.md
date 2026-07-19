@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="frontend/public/assets/diana-logo-transparent.svg" alt="DIANA logo" width="150" />
+  <img src="figures/README%20(1).png" alt="DIANA — from responsible contribution to reproducible evidence" width="100%" />
 </p>
-
-<h1 align="center">DIANA</h1>
 
 **Diana Application for participants and researchers**
 **https://diana-rust.vercel.app/**
@@ -28,9 +26,7 @@ https://diana-benchmark-studio.vercel.app/**
   <a href="#quick-start">Quick start</a>
 </p>
 
-<p align="center">
-  <img src="figures/README%20(1).png" alt="DIANA — from responsible contribution to reproducible evidence" width="100%" />
-</p>
+
 
 ---
 
