@@ -20,15 +20,6 @@ const scenes = [
   { id: "closing", from: 1560, duration: 240, node: React.createElement(ClosingScene, { durationInFrames: 240 }) },
 ];
 
-const tickerItems = [
-  "consent first",
-  "participant choice",
-  "aggregate only",
-  "governed access",
-  "feasibility before files",
-  "reproducible evidence",
-];
-
 const featuredProject = projects.find((project) => project.id === "mcphases");
 const fallbackAvailability: Availability[] = [
   { categoryId: "cycle", participants: 1248, percent: 86, state: "Strong coverage" },
@@ -41,7 +32,7 @@ export function DianaProjectVideo() {
   return (
     <AbsoluteFill className="diana-video">
       <AnimatedBackdrop />
-      <Audio src={staticFile("assets/diana-video-elevenlabs.wav")} volume={1} />
+      <Audio src={staticFile("assets/diana-video-master.wav")} volume={1} />
       {scenes.map((scene) => (
         <Sequence key={scene.id} from={scene.from} durationInFrames={scene.duration}>
           {scene.node}
@@ -55,20 +46,18 @@ export function DianaProjectVideo() {
 function AnimatedBackdrop() {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
-  const drift = interpolate(frame, [0, durationInFrames], [-120, 160], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const ticker = interpolate(frame % 210, [0, 210], [0, -720]);
+  const drift = interpolate(frame, [0, durationInFrames], [-160, 180], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const line = interpolate(frame, [0, durationInFrames], [8, 92], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const chapter = scenes.findIndex((scene) => frame < scene.from + scene.duration) + 1;
 
   return (
-    <AbsoluteFill className="animated-backdrop">
-      <div className="blob blob-purple" style={{ transform: `translate(${drift}px, ${drift * 0.24}px) scale(${1 + Math.sin(frame / 34) * 0.035})` }} />
-      <div className="blob blob-green" style={{ transform: `translate(${-drift * 0.72}px, ${drift * 0.2}px) scale(${1 + Math.cos(frame / 38) * 0.04})` }} />
-      <div className="ticker ticker-top" style={{ transform: `translateX(${ticker}px)` }}>
-        {[...tickerItems, ...tickerItems, ...tickerItems].map((item, index) => <span key={`${item}-${index}`}>{item}</span>)}
-      </div>
-      <div className="ticker ticker-bottom" style={{ transform: `translateX(${-ticker - 720}px)` }}>
-        {[...tickerItems].reverse().concat(tickerItems).map((item, index) => <span key={`${item}-bottom-${index}`}>{item}</span>)}
-      </div>
-      <div className="grid-overlay" />
+    <AbsoluteFill className="cinematic-backdrop">
+      <div className="backdrop-word" style={{ transform: `translateX(${drift}px)` }}>DIANA</div>
+      <div className="backdrop-rule backdrop-rule-vertical" />
+      <div className="backdrop-rule backdrop-rule-horizontal" style={{ width: `${line}%` }} />
+      <div className="backdrop-index">{String(chapter).padStart(2, "0")} / 07</div>
+      <div className="letterbox letterbox-top" />
+      <div className="letterbox letterbox-bottom" />
     </AbsoluteFill>
   );
 }
@@ -91,17 +80,14 @@ function SceneShell({ children, durationInFrames, kicker, title, tone = "neutral
   const intro = springIn(frame, fps, 0);
   const titleIntro = springIn(frame, fps, 7);
   const outro = interpolate(frame, [durationInFrames - 20, durationInFrames], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const style: React.CSSProperties = {
-    opacity: intro * outro,
-    transform: `translateY(${(1 - intro) * 34}px) scale(${0.985 + intro * 0.015})`,
-  };
+  const style: React.CSSProperties = { opacity: intro * outro, clipPath: `inset(0 ${(1 - intro) * 12}% 0 0)` };
 
   return (
     <AbsoluteFill className={`scene scene-${tone}`} style={style}>
       <section className="scene-frame">
+        <span className="scene-marker">{kicker}</span>
         <header className="scene-header">
-          <span className="scene-kicker">{kicker}</span>
-          <h1 style={{ opacity: titleIntro, transform: `translateX(${(1 - titleIntro) * -42}px)` }}>{title}</h1>
+          <h1 style={{ opacity: titleIntro, clipPath: `inset(0 ${(1 - titleIntro) * 18}% 0 0)` }}>{title}</h1>
         </header>
         {children}
       </section>
@@ -113,65 +99,56 @@ function OpeningScene({ durationInFrames }: { durationInFrames: number }) {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const logo = springIn(frame, fps, 5);
-  const orbit = frame * 2.1;
 
   return (
-    <SceneShell durationInFrames={durationInFrames} kicker="DIANA in 60 seconds" title="Consent-based data infrastructure for responsible research" tone="purple">
-      <CelebrationAccents delay={96} pieces={12} />
+    <SceneShell durationInFrames={durationInFrames} kicker="System boundary" title="A synthetic consent prototype and an implemented private-truth benchmark" tone="purple">
       <div className="opening-layout">
-        <div className="hero-copy" style={{ opacity: logo, transform: `translateY(${(1 - logo) * 34}px) rotate(${(1 - logo) * -2}deg)` }}>
+        <div className="hero-copy" style={{ opacity: logo }}>
           <Img className="hero-logo" src={staticFile("assets/diana-logo-transparent.svg")} alt="DIANA" />
-          <p>Participants choose what to share. Researchers get governed, aggregate feasibility before approved access.</p>
-          <ComedyCaption delay={58}>Consent remains explicit, reviewable, and revocable.</ComedyCaption>
+          <p>Two technical surfaces demonstrate how permission metadata, preliminary feasibility, and reproducible evaluation can remain separated by clear controls.</p>
+          <Statement delay={58}>The prototype and benchmark are intentionally non-integrated.</Statement>
         </div>
-        <div className="orbit-stage">
-          <div className="orbit-ring" style={{ transform: `rotate(${orbit}deg)` }}>
-            <span style={{ transform: `rotate(${-orbit}deg)` }}>cycle</span>
-            <span style={{ transform: `rotate(${-orbit}deg)` }}>sleep</span>
-            <span style={{ transform: `rotate(${-orbit}deg)` }}>symptoms</span>
-            <span style={{ transform: `rotate(${-orbit}deg)` }}>hormones</span>
-          </div>
-          <SignalCard delay={38} icon={UserRoundCheck} title="Participant control" text="Pick categories, project scope, and future permissions." />
-          <SignalCard delay={56} icon={ShieldCheck} title="Consent first" text="No contribution is recorded without explicit permission." />
-          <SignalCard delay={74} icon={FlaskConical} title="Research readiness" text="Aggregate feasibility, then governance. Not the other way around." />
+        <div className="signal-stage" style={{ opacity: springIn(frame, fps, 20) }}>
+          <div className="signal-axis" style={{ height: `${interpolate(frame, [22, 118], [0, 100], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}%` }} />
+          <SignalCard delay={38} icon={UserRoundCheck} title="Browser prototype" text="Consent metadata, project setup, and synthetic feasibility." />
+          <SignalCard delay={56} icon={ShieldCheck} title="Client-side controls" text="Scope matching, withdrawal state, and download gating." />
+          <SignalCard delay={74} icon={FlaskConical} title="Implemented benchmark" text="Private truth, frozen folds, budget tracks, and aggregate release." />
         </div>
       </div>
-      <FooterNote>Prototype only. No diagnosis, treatment, clinical claims, or identifiable participant data.</FooterNote>
+      <FooterNote>Synthetic browser prototype plus a separately implemented research benchmark. No diagnosis or clinical claims.</FooterNote>
     </SceneShell>
   );
 }
 
 function MissionScene({ durationInFrames }: { durationInFrames: number }) {
-  const frame = useCurrentFrame();
-
   return (
-    <SceneShell durationInFrames={durationInFrames} kicker="The reusable layer" title="DIANA converts research chaos into governed infrastructure" tone="neutral">
+    <SceneShell durationInFrames={durationInFrames} kicker="Browser architecture" title="Permissions and project requirements live in explicit client-side state" tone="neutral">
       <div className="mission-stage">
         <div className="chaos-stack">
-          <FloatingNote delay={12} text="Fragmented source files" tone="purple" />
-          <FloatingNote delay={30} text="Unclear access boundaries" tone="green" />
-          <FloatingNote delay={48} text="Ethics approval: pending" tone="neutral" />
-          <FloatingNote delay={66} text="Inconsistent variable definitions" tone="purple" />
+          <FloatingNote delay={12} text="categoryIds: string[]" tone="purple" />
+          <FloatingNote delay={30} text="projectId: string | null" tone="green" />
+          <FloatingNote delay={48} text="scope: project | approved-projects" tone="neutral" />
+          <FloatingNote delay={66} text="status: active | withdrawn" tone="purple" />
         </div>
-        <div className="processor-card" style={{ transform: `scale(${0.98 + Math.sin(frame / 18) * 0.012})` }}>
+        <div className="processor-card">
           <Sparkles aria-hidden="true" />
-          <strong>DIANA governance engine</strong>
-          <span>Consent checks, de-identification, variable availability, follow-up coverage.</span>
+          <strong>Client-side state model</strong>
+          <span>React state and localStorage. No health-record ingestion or server-side consent service.</span>
         </div>
         <div className="mission-grid mission-grid-tight">
-          <AnimatedIconCard delay={48} icon={Database} title="Availability" text="Categories, completeness, follow-up, population fit." />
-          <AnimatedIconCard delay={66} icon={ShieldCheck} title="Boundaries" text="Participant scope stays attached to every project." />
-          <AnimatedIconCard delay={84} icon={FileCheck2} title="Output" text="Structured, approved, de-identified datasets." />
+          <AnimatedIconCard delay={48} icon={Database} title="Match rules" text="Status, scope, timing, and optional similar-project permission." />
+          <AnimatedIconCard delay={66} icon={ShieldCheck} title="Feasibility heuristic" text="Fixture coverage adjusted by follow-up and collection timing." />
+          <AnimatedIconCard delay={84} icon={FileCheck2} title="Output boundary" text="Preliminary synthetic aggregates, never participant rows." />
         </div>
       </div>
       <div className="mission-strip mission-strip-fast">
-        <span>discover</span>
+        <span>select</span>
         <ArrowRight aria-hidden="true" />
         <span>consent</span>
         <ArrowRight aria-hidden="true" />
-        <span>assess</span>
+        <span>match</span>
         <ArrowRight aria-hidden="true" />
-        <span>govern</span>
+        <span>estimate</span>
       </div>
     </SceneShell>
   );
@@ -179,39 +156,39 @@ function MissionScene({ durationInFrames }: { durationInFrames: number }) {
 
 function ParticipantScene({ durationInFrames }: { durationInFrames: number }) {
   const frame = useCurrentFrame();
-  const steps = ["Pick data", "Choose scope", "Sign consent", "Withdraw later"];
+  const steps = ["Select category IDs", "Set scope and timing", "Simulate signature", "Withdraw future use"];
 
   // The active consent step advances through the scene to demonstrate the participant journey.
   const activeStep = Math.min(steps.length - 1, Math.floor(frame / 58));
 
   return (
-    <SceneShell durationInFrames={durationInFrames} kicker="Participant journey" title="Selective contribution with clear, reversible permissions" tone="green">
+    <SceneShell durationInFrames={durationInFrames} kicker="Consent record" title="Consent is structured metadata with an explicit state transition" tone="green">
       <div className="participant-layout">
-        <div className="phone-frame phone-frame-animated" style={{ transform: `rotate(${Math.sin(frame / 30) * 0.55}deg)` }}>
-          <div className="phone-top">Participant consent flow</div>
+        <div className="phone-frame">
+          <div className="phone-top">Prototype consent state</div>
           <div className="phone-steps">
             {steps.map((step, index) => (
               <ConsentStep key={step} active={index <= activeStep} done={index < activeStep} index={index} label={step} />
             ))}
           </div>
-          <div className="scope-card scope-card-pop">
-            <span>Permission scope</span>
-            <strong>{activeStep > 1 ? "Active consent recorded" : "Project-specific or eligible approved projects"}</strong>
+          <div className="scope-card">
+            <span>Persisted state</span>
+            <strong>{activeStep > 1 ? "status: active" : "scope: project | approved-projects"}</strong>
           </div>
         </div>
         <div className="category-panel">
-          <p className="panel-label">Selectable categories</p>
+          <p className="panel-label">categoryIds</p>
           <div className="category-cloud category-cloud-animated">
             {categories.map((category, index) => <AnimatedPill key={category.id} delay={index * 7}>{category.shortTitle}</AnimatedPill>)}
           </div>
           <div className="rejection-board">
-            <RejectionTag delay={34}>real names</RejectionTag>
-            <RejectionTag delay={54}>raw signatures</RejectionTag>
-            <RejectionTag delay={74}>medical advice</RejectionTag>
+            <RejectionTag delay={34}>health payloads</RejectionTag>
+            <RejectionTag delay={54}>signature documents</RejectionTag>
+            <RejectionTag delay={74}>server upload</RejectionTag>
           </div>
           <div className="participant-proof">
-            <MiniStat value="0" label="identifiable rows shown" />
-            <MiniStat value="100%" label="synthetic demo values" />
+            <MiniStat value="0" label="health records uploaded" />
+            <MiniStat value="local" label="prototype persistence boundary" />
           </div>
         </div>
       </div>
@@ -229,15 +206,15 @@ function ResearcherScene({ durationInFrames }: { durationInFrames: number }) {
   const animatedDataPoints = Math.round(interpolate(frame, [42, 138], [0, dataPoints], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
 
   return (
-    <SceneShell durationInFrames={durationInFrames} kicker="Researcher dashboard" title="Aggregate feasibility before governed data access" tone="purple">
+    <SceneShell durationInFrames={durationInFrames} kicker="Feasibility estimator" title="A documented heuristic, not a participant-level cohort query" tone="purple">
       <div className="researcher-layout">
-        <section className="dashboard-card dashboard-card-kinetic">
+        <section className="dashboard-card">
           <div className="dashboard-title-row">
             <div>
-              <span>Prototype estimate</span>
+              <span>Preliminary synthetic estimate</span>
               <h2>{projectTitle}</h2>
             </div>
-            <StatusBadge>Aggregate only</StatusBadge>
+            <StatusBadge>Synthetic aggregate</StatusBadge>
           </div>
           <div className="availability-list">
             {rows.map((item, index) => (
@@ -253,11 +230,11 @@ function ResearcherScene({ durationInFrames }: { durationInFrames: number }) {
           </div>
         </section>
         <aside className="researcher-stats">
-          <MetricCard tone="green" value={formatNumber(animatedParticipants)} label="matching participants" />
-          <MetricCard tone="purple" value={formatNumber(animatedDataPoints)} label="synthetic data points" />
-          <div className="download-card download-card-shake" style={{ transform: `translateX(${frame > 118 && frame < 150 ? Math.sin(frame * 1.4) * 6 : 0}px)` }}>
+          <MetricCard tone="green" value={formatNumber(animatedParticipants)} label="synthetic matching estimate" />
+          <MetricCard tone="purple" value={formatNumber(animatedDataPoints)} label="estimated aggregate data points" />
+          <div className="download-card">
             <LockKeyhole aria-hidden="true" />
-            <strong>Dataset access remains locked until governance approval.</strong>
+            <strong>The client gate exports category-level synthetic CSV only.</strong>
           </div>
         </aside>
       </div>
@@ -267,19 +244,19 @@ function ResearcherScene({ durationInFrames }: { durationInFrames: number }) {
 
 function GovernanceScene({ durationInFrames }: { durationInFrames: number }) {
   return (
-    <SceneShell durationInFrames={durationInFrames} kicker="Governance model" title="Privacy and permission remain attached to every request" tone="green">
-      <div className="governance-flow governance-flow-animated">
-        <FlowNode delay={10} icon={UserRoundCheck} title="Contribution" text="Participant-selected categories" />
+    <SceneShell durationInFrames={durationInFrames} kicker="Prototype gate" title="Preliminary estimates remain separate from downloadable aggregates" tone="green">
+      <div className="governance-flow">
+        <FlowNode delay={10} icon={UserRoundCheck} title="Consent metadata" text="Scope, timing, options, and status" />
         <FlowArrow delay={28} />
-        <FlowNode delay={42} icon={ShieldCheck} title="Consent ledger" text="Scope and options checked" />
+        <FlowNode delay={42} icon={ShieldCheck} title="Match function" text="Active and compatible permission" />
         <FlowArrow delay={60} />
-        <FlowNode delay={74} icon={LockKeyhole} title="De-identify" text="No names, emails, or signatures" />
+        <FlowNode delay={74} icon={LockKeyhole} title="Client gate" text="Project downloadReady flag" />
         <FlowArrow delay={92} />
-        <FlowNode delay={106} icon={Database} title="Dataset" text="Structured, approved access" />
+        <FlowNode delay={106} icon={Database} title="CSV export" text="Category-level synthetic aggregates" />
       </div>
-      <div className="governance-notice governance-notice-pop">
+      <div className="governance-notice">
         <Sparkles aria-hidden="true" />
-        <p>Scientist views expose aggregate availability and governance status. Re-identification is prohibited by design and policy.</p>
+        <p>Production authorization, institutional verification, health-data ingestion, and de-identification remain represented requirements rather than implemented services.</p>
       </div>
     </SceneShell>
   );
@@ -287,22 +264,22 @@ function GovernanceScene({ durationInFrames }: { durationInFrames: number }) {
 
 function BenchmarkScene({ durationInFrames }: { durationInFrames: number }) {
   return (
-    <SceneShell durationInFrames={durationInFrames} kicker="Reproducible benchmark layer" title="Hormonbench: evaluation with explicit, auditable constraints" tone="neutral">
+    <SceneShell durationInFrames={durationInFrames} kicker="Implemented benchmark" title="A frozen causal task isolates model evaluation from private truth" tone="neutral">
       <div className="benchmark-layout">
-        <div className="task-diagram task-diagram-kinetic">
-          <p className="panel-label">Frozen forecasting task</p>
-          <div className="timeline-row timeline-row-fast">
+        <div className="task-diagram">
+          <p className="panel-label">hormonbench_mcphases_interval2_nextday_v1</p>
+          <div className="timeline-row">
             {Array.from({ length: 14 }, (_, index) => <TimelineToken key={`t-minus-${13 - index}`} delay={index * 3}>t-{13 - index}</TimelineToken>)}
             <ArrowRight aria-hidden="true" />
             <strong>t+1</strong>
           </div>
-          <p>Fourteen approved historical days forecast genuinely observed next-day urinary LH, E3G, and PdG. Future observations remain unavailable to the model.</p>
-          <ComedyCaption delay={122}>Leakage controls are part of the benchmark contract.</ComedyCaption>
+          <p>Exactly fourteen causal wearable days forecast participant-entered next-day urinary LH, E3G, and PdG. Future observations remain unavailable to the model.</p>
+          <Statement delay={122}>Five deterministic folds test every eligible participant exactly once.</Statement>
         </div>
         <div className="benchmark-cards">
-          <AnimatedIconCard delay={38} icon={UsersRound} title="Participant-independent folds" text="Every eligible participant is tested once, preventing train-test leakage across people." />
-          <AnimatedIconCard delay={58} icon={FlaskConical} title="Budget tracks" text="Cold start and K=0, 3, 7 isolate the value and burden of personal tests." />
-          <AnimatedIconCard delay={78} icon={FileCheck2} title="Public evidence" text="Only aggregate results are public. Private truth, rows, predictions, and IDs stay private." />
+          <AnimatedIconCard delay={38} icon={UsersRound} title="Private evaluator" text="Held-out truth is joined only inside the evaluator." />
+          <AnimatedIconCard delay={58} icon={FlaskConical} title="Budget tracks" text="Cold start and K=0, 3, 7 authorized personal readings." />
+          <AnimatedIconCard delay={78} icon={FileCheck2} title="Release boundary" text="IDs, truth, folds, predictions, and participant metrics remain private." />
         </div>
       </div>
     </SceneShell>
@@ -315,21 +292,21 @@ function ClosingScene({ durationInFrames }: { durationInFrames: number }) {
   const mark = springIn(frame, fps, 12);
 
   return (
-    <SceneShell durationInFrames={durationInFrames} kicker="Project close" title="Governance is part of the product" tone="purple">
-      <CelebrationAccents delay={18} pieces={18} />
+    <SceneShell durationInFrames={durationInFrames} kicker="Technical close" title="Prototype boundaries are explicit. Benchmark boundaries are enforced." tone="purple">
       <div className="closing-layout">
-        <Img className="closing-logo" src={staticFile("assets/diana-logo-transparent.svg")} alt="DIANA" style={{ opacity: mark, transform: `scale(${0.9 + mark * 0.1}) rotate(${(1 - mark) * -3}deg)` }} />
-        <p>Participant choice, researcher feasibility, de-identification, governance, and reproducible benchmark contracts in one portable project.</p>
+        <div className="closing-rule" style={{ width: `${mark * 100}%` }} />
+        <Img className="closing-logo" src={staticFile("assets/diana-logo-transparent.svg")} alt="DIANA" style={{ opacity: mark }} />
+        <p>Browser consent metadata demonstrates the governed experience. Hormonbench supplies reproducible private-truth evaluation. Integration is the next infrastructure boundary.</p>
         <div className="closing-tags">
           {[
-            "open",
-            "reproducible",
-            "privacy-conscious",
-            "nonclinical",
+            "synthetic prototype",
+            "local consent state",
+            "private evaluator",
+            "aggregate release",
           ].map((tag, index) => <AnimatedPill key={tag} delay={68 + index * 8}>{tag}</AnimatedPill>)}
         </div>
       </div>
-      <FooterNote>Reusable application-infrastructure layer. Synthetic prototype values only.</FooterNote>
+      <FooterNote>Open, reproducible, nonclinical infrastructure with documented prototype and benchmark boundaries.</FooterNote>
     </SceneShell>
   );
 }
@@ -340,7 +317,7 @@ function SignalCard({ delay, icon: Icon, text, title }: { delay: number; icon: L
   const intro = springIn(frame, fps, delay);
 
   return (
-    <article className="signal-card signal-card-pop" style={{ opacity: intro, transform: `translateY(${(1 - intro) * 28}px) rotate(${(1 - intro) * 4}deg)` }}>
+    <article className="signal-card signal-card-pop" style={{ opacity: intro, clipPath: `inset(0 0 ${(1 - intro) * 100}% 0)` }}>
       <Icon aria-hidden="true" />
       <h2>{title}</h2>
       <p>{text}</p>
@@ -354,7 +331,7 @@ function AnimatedIconCard({ delay, icon: Icon, text, title }: { delay: number; i
   const intro = springIn(frame, fps, delay);
 
   return (
-    <article className="icon-card icon-card-animated" style={{ opacity: intro, transform: `translateY(${(1 - intro) * 34}px) scale(${0.92 + intro * 0.08})` }}>
+    <article className="icon-card icon-card-animated" style={{ opacity: intro, clipPath: `inset(0 0 ${(1 - intro) * 100}% 0)` }}>
       <Icon aria-hidden="true" />
       <h2>{title}</h2>
       <p>{text}</p>
@@ -366,9 +343,7 @@ function FloatingNote({ delay, text, tone }: { delay: number; text: string; tone
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const intro = springIn(frame, fps, delay);
-  const wobble = Math.sin((frame + delay) / 14) * 5;
-
-  return <span className={`floating-note floating-note-${tone}`} style={{ opacity: intro, transform: `translate(${(1 - intro) * -90}px, ${wobble}px) rotate(${(1 - intro) * -7 + wobble * 0.18}deg)` }}>{text}</span>;
+  return <span className={`floating-note floating-note-${tone}`} style={{ opacity: intro, clipPath: `inset(0 ${(1 - intro) * 100}% 0 0)` }}>{text}</span>;
 }
 
 function ConsentStep({ active, done, index, label }: { active: boolean; done: boolean; index: number; label: string }) {
@@ -377,7 +352,7 @@ function ConsentStep({ active, done, index, label }: { active: boolean; done: bo
   const intro = springIn(frame, fps, index * 10);
 
   return (
-    <div className={`phone-step ${active ? "phone-step-active" : ""}`} style={{ opacity: intro, transform: `translateX(${(1 - intro) * -32}px)` }}>
+    <div className={`phone-step ${active ? "phone-step-active" : ""}`} style={{ opacity: intro, clipPath: `inset(0 ${(1 - intro) * 100}% 0 0)` }}>
       <span>{done ? <CheckCircle2 aria-hidden="true" /> : index + 1}</span>
       <strong>{label}</strong>
     </div>
@@ -389,7 +364,7 @@ function AnimatedPill({ children, delay }: { children: React.ReactNode; delay: n
   const { fps } = useVideoConfig();
   const intro = springIn(frame, fps, delay);
 
-  return <span className="data-pill data-pill-animated" style={{ opacity: intro, transform: `translateY(${(1 - intro) * 30}px) rotate(${(1 - intro) * -5}deg)` }}>{children}</span>;
+  return <span className="data-pill data-pill-animated" style={{ opacity: intro }}>{children}</span>;
 }
 
 function RejectionTag({ children, delay }: { children: React.ReactNode; delay: number }) {
@@ -397,15 +372,12 @@ function RejectionTag({ children, delay }: { children: React.ReactNode; delay: n
   const { fps } = useVideoConfig();
   const intro = springIn(frame, fps, delay);
 
-  return <span className="rejection-tag" style={{ opacity: intro, transform: `translateX(${(1 - intro) * 44}px) rotate(${(1 - intro) * 4}deg)` }}>Nope: {children}</span>;
+  return <span className="rejection-tag" style={{ opacity: intro, clipPath: `inset(0 0 0 ${(1 - intro) * 100}%)` }}>Excluded: {children}</span>;
 }
 
 function MiniStat({ label, value }: { label: string; value: string }) {
-  const frame = useCurrentFrame();
-  const pulse = 1 + Math.sin(frame / 10) * 0.012;
-
   return (
-    <div className="mini-stat" style={{ transform: `scale(${pulse})` }}>
+    <div className="mini-stat">
       <strong>{value}</strong>
       <span>{label}</span>
     </div>
@@ -419,7 +391,7 @@ function AvailabilityRow({ delay, label, participants, percent, state }: { delay
   const width = interpolate(frame, [delay + 20, delay + 88], [0, percent], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <div className="availability-row" style={{ opacity: intro, transform: `translateX(${(1 - intro) * -26}px)` }}>
+    <div className="availability-row" style={{ opacity: intro, clipPath: `inset(0 ${(1 - intro) * 100}% 0 0)` }}>
       <div>
         <strong>{label}</strong>
         <span>{state}</span>
@@ -433,11 +405,8 @@ function AvailabilityRow({ delay, label, participants, percent, state }: { delay
 }
 
 function MetricCard({ label, tone, value }: { label: string; tone: "green" | "purple"; value: string }) {
-  const frame = useCurrentFrame();
-  const pulse = 1 + Math.sin(frame / 13) * 0.014;
-
   return (
-    <div className={`metric-card metric-${tone}`} style={{ transform: `scale(${pulse})` }}>
+    <div className={`metric-card metric-${tone}`}>
       <strong>{value}</strong>
       <span>{label}</span>
     </div>
@@ -445,10 +414,7 @@ function MetricCard({ label, tone, value }: { label: string; tone: "green" | "pu
 }
 
 function StatusBadge({ children }: { children: React.ReactNode }) {
-  const frame = useCurrentFrame();
-  const tick = frame % 34 < 17 ? 0 : 1;
-
-  return <span className="status-badge" style={{ transform: `translateY(${tick}px)` }}>{children}</span>;
+  return <span className="status-badge">{children}</span>;
 }
 
 function FlowNode({ delay, icon: Icon, text, title }: { delay: number; icon: LucideIcon; text: string; title: string }) {
@@ -457,7 +423,7 @@ function FlowNode({ delay, icon: Icon, text, title }: { delay: number; icon: Luc
   const intro = springIn(frame, fps, delay);
 
   return (
-    <article className="flow-node" style={{ opacity: intro, transform: `translateY(${(1 - intro) * 38}px) scale(${0.9 + intro * 0.1})` }}>
+    <article className="flow-node" style={{ opacity: intro, clipPath: `inset(${(1 - intro) * 100}% 0 0 0)` }}>
       <Icon aria-hidden="true" />
       <h2>{title}</h2>
       <p>{text}</p>
@@ -470,7 +436,7 @@ function FlowArrow({ delay }: { delay: number }) {
   const { fps } = useVideoConfig();
   const intro = springIn(frame, fps, delay);
 
-  return <ArrowRight className="flow-arrow" aria-hidden="true" style={{ opacity: intro, transform: `translateX(${(1 - intro) * -20}px)` }} />;
+  return <ArrowRight className="flow-arrow" aria-hidden="true" style={{ opacity: intro }} />;
 }
 
 function TimelineToken({ children, delay }: { children: React.ReactNode; delay: number }) {
@@ -478,43 +444,15 @@ function TimelineToken({ children, delay }: { children: React.ReactNode; delay: 
   const { fps } = useVideoConfig();
   const intro = springIn(frame, fps, delay);
 
-  return <span style={{ opacity: intro, transform: `translateY(${(1 - intro) * -18}px)` }}>{children}</span>;
+  return <span style={{ opacity: intro }}>{children}</span>;
 }
 
-function ComedyCaption({ children, delay }: { children: React.ReactNode; delay: number }) {
+function Statement({ children, delay }: { children: React.ReactNode; delay: number }) {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const intro = springIn(frame, fps, delay);
 
-  return <div className="comedy-caption" style={{ opacity: intro, transform: `translateY(${(1 - intro) * 24}px) rotate(${(1 - intro) * -2}deg)` }}>{children}</div>;
-}
-
-function CelebrationAccents({ delay, pieces = 14 }: { delay: number; pieces?: number }) {
-  const frame = useCurrentFrame();
-  const particles = Array.from({ length: pieces }, (_, index) => index);
-
-  return (
-    <div className="celebration-layer" aria-hidden="true">
-      {particles.map((particle) => {
-        const corner = particle % 4;
-        const group = Math.floor(particle / 4);
-        const start = delay + group * 3;
-        const duration = 54 + (particle % 4) * 6;
-        const end = start + duration;
-        const progress = interpolate(frame, [start, end], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-        const opacity = interpolate(frame, [start, start + 6, end - 16, end], [0, 0.72, 0.38, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-        const fromLeft = corner === 0 || corner === 2;
-        const fromTop = corner < 2;
-        const xDistance = 92 + (group % 3) * 22;
-        const yDistance = 72 + (particle % 3) * 18;
-        const x = (fromLeft ? 26 : 1742) + (fromLeft ? 1 : -1) * progress * xDistance;
-        const y = (fromTop ? 92 : 848) + (fromTop ? 1 : -1) * progress * yDistance;
-        const rotate = (fromLeft ? 1 : -1) * progress * (72 + (particle % 5) * 18);
-        const scale = interpolate(progress, [0, 0.18, 1], [0.7, 1, 0.84]);
-        return <span key={particle} className={`celebration-particle celebration-particle-${particle % 3}`} style={{ opacity, transform: `translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})` }} />;
-      })}
-    </div>
-  );
+  return <div className="statement" style={{ opacity: intro, clipPath: `inset(0 ${(1 - intro) * 100}% 0 0)` }}>{children}</div>;
 }
 
 function FooterNote({ children }: { children: React.ReactNode }) {
