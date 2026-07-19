@@ -8,6 +8,7 @@ LICENSE.zip
 
 .venv/
 backend/.venv/
+backend/.session-secret
 __pycache__/
 *.py[cod]
 .pytest_cache/

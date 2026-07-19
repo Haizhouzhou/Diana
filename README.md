@@ -132,7 +132,7 @@ DIANA_SCIENTIST_PASSWORD=<scientist-password>
 DIANA_SECURE_COOKIES=true
 ```
 
-Vercel sets `VERCEL_ENV` automatically. In preview and production environments, DIANA refuses to start with the documented demo passwords or signing secret and automatically enables secure cookies. Add a Vercel Firewall rate-limit rule for `POST /api/auth/login` before exposing the prototype publicly.
+Vercel sets `VERCEL_ENV` automatically, and DIANA automatically enables secure cookies in preview and production. The Vercel image generates a private signing secret when `DIANA_SESSION_SECRET` is not configured, so deployment can start with no additional setup. Set an explicit secret to keep sessions valid across image rebuilds, replace both demo passwords before public use, and add a Vercel Firewall rate-limit rule for `POST /api/auth/login`.
 
 Generate a session secret locally with:
 

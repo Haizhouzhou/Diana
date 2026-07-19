@@ -15,6 +15,7 @@ WORKDIR /app
 COPY backend/pyproject.toml backend/uv.lock ./backend/
 RUN pip install --no-cache-dir uv==0.11.12 && uv sync --project backend --frozen --no-dev
 COPY backend/ ./backend/
+RUN python -c "import secrets; from pathlib import Path; Path('/app/backend/.session-secret').write_text(secrets.token_urlsafe(48), encoding='utf-8')"
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
 EXPOSE 80

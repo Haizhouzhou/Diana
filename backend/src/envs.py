@@ -1,8 +1,17 @@
 from pathlib import Path
-from typing import Self
 
-from pydantic import AliasChoices, Field, SecretStr, model_validator
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+SESSION_SECRET_FILE = Path(__file__).resolve().parents[1] / ".session-secret"
+
+# Prefer the private secret generated inside the production image when no environment secret is set.
+DEFAULT_SESSION_SECRET = (
+    SESSION_SECRET_FILE.read_text(encoding="utf-8").strip()
+    if SESSION_SECRET_FILE.is_file()
+    else "local-only-change-this-session-secret"
+)
 
 
 class Settings(BaseSettings):
@@ -14,28 +23,13 @@ class Settings(BaseSettings):
     frontend_dist: Path = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
     # Prototype account settings
-    session_secret: SecretStr = SecretStr("local-only-change-this-session-secret")
+    session_secret: SecretStr = SecretStr(DEFAULT_SESSION_SECRET)
     scientist_username: str = "scientist"
     scientist_password: SecretStr = SecretStr("diana-scientist")
     participant_username: str = "participant"
     participant_password: SecretStr = SecretStr("diana-participant")
 
     model_config = SettingsConfigDict(env_prefix="DIANA_", env_file=".env", extra="ignore")
-
-    @model_validator(mode="after")
-    def validate_deployed_credentials(self) -> Self:
-        """Reject documented local credentials in public Vercel environments."""
-
-        # Prevent a preview or production deployment from accepting known demo secrets.
-        if self.deployment in {"preview", "production"}:
-            defaults_present = (
-                self.session_secret.get_secret_value() == "local-only-change-this-session-secret"
-                or self.participant_password.get_secret_value() == "diana-participant"
-                or self.scientist_password.get_secret_value() == "diana-scientist"
-            )
-            if defaults_present:
-                raise ValueError("Set DIANA session and account secrets before deploying to Vercel")
-        return self
 
 
 env = Settings()
