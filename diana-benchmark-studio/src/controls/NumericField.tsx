@@ -1,0 +1,4 @@
+export function NumericField({ id, label, value, onChange, min, max, step = 1, disabled = false, hint }: { id: string; label: string; value: number; onChange: (value: number) => void; min: number; max: number; step?: number; disabled?: boolean; hint?: string }) {
+  const set = (next: number) => onChange(Math.min(max, Math.max(min, Number.isFinite(next) ? next : min)));
+  return <div className="field-row"><div><label htmlFor={id}>{label}</label>{hint && <small>{hint}</small>}</div><div className="number-stepper"><button type="button" aria-label={`Decrease ${label}`} disabled={disabled || value <= min} onClick={() => set(value - step)}>−</button><input id={id} type="number" value={value} min={min} max={max} step={step} disabled={disabled} onChange={(event) => set(event.currentTarget.valueAsNumber)} /><button type="button" aria-label={`Increase ${label}`} disabled={disabled || value >= max} onClick={() => set(value + step)}>+</button></div></div>;
+}

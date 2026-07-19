@@ -1,0 +1,5 @@
+import { useState } from "react";
+export function ColumnRoleEditor({ id, label, values, onChange, disabled = false, hint }: { id: string; label: string; values: string[]; onChange: (values: string[]) => void; disabled?: boolean; hint?: string }) {
+  const [query, setQuery] = useState(""); const visible = values.filter((value) => value.toLowerCase().includes(query.toLowerCase()));
+  return <div className="field-row column-editor"><div><label htmlFor={id}>{label}</label>{hint && <small>{hint}</small>}</div><div><input id={id} type="text" value={values.join(", ")} disabled={disabled} onChange={(event) => onChange(event.currentTarget.value.split(",").map((value) => value.trim()).filter(Boolean))} /><input className="column-search" type="search" aria-label={`Search ${label}`} placeholder="Filter declared columns" value={query} disabled={disabled} onChange={(event) => setQuery(event.currentTarget.value)} /><div className="tokens" aria-label={`${label} values`}>{visible.map((value) => <span key={value}>{value}</span>)}{query && !visible.length && <small>No declared columns match.</small>}</div></div></div>;
+}

@@ -1,0 +1,2 @@
+import type { TaskSpec } from "../contracts/task-spec";
+export function PipelineGraph({ spec }: { spec: TaskSpec }) { const steps = ["Explicit roles", "Scientific lint", spec.split.type.replaceAll("_", " "), "Train-only transform", `${spec.models.length} model${spec.models.length > 1 ? "s" : ""}`, spec.metrics.primary, "Aggregate evidence"]; return <figure className="protocol-figure"><figcaption>Executable pipeline</figcaption><ol className="pipeline-graph">{steps.map((step) => <li key={step}>{step}</li>)}</ol></figure>; }

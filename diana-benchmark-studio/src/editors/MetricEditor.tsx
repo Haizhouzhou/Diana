@@ -1,0 +1,3 @@
+import { MetricTable } from "../controls/MetricTable";
+import { useStudio } from "../workspace/studio-context";
+export function MetricEditor() { const { spec, updateSpec } = useStudio(); return <section className="editor-section" aria-labelledby="metric-title"><header><p className="eyebrow">06 / Metrics</p><h1 id="metric-title">Make comparison rules explicit</h1><p>Group-macro metrics give each participant equal influence. Target weights aggregate multi-target outcomes and must sum to one.</p></header><MetricTable spec={spec} disabled={spec.mode === "hormonbench_preset"} onChange={(metrics) => updateSpec((draft) => { draft.metrics = metrics; })} /></section>; }

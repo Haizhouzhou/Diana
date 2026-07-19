@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.vercel/
+coverage/
+verification/.generated/
+*.map
+*.zip
+*.ipynb
+generated-config.*
+results/
+*.log
+*.tsbuildinfo

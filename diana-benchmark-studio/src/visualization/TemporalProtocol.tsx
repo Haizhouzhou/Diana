@@ -1,0 +1,2 @@
+import type { TaskSpec } from "../contracts/task-spec";
+export function TemporalProtocol({ spec }: { spec: TaskSpec }) { return <figure className="protocol-figure"><figcaption>Temporal protocol</figcaption><div className="timeline" aria-hidden="true"><span>t−{spec.task.history_window - 1}</span><i /><span>origin t</span><b>→ {spec.task.forecast_horizon} step{spec.task.forecast_horizon > 1 ? "s" : ""} →</b><strong>target</strong></div><p>Inputs stop at the origin. The outcome occurs {spec.task.forecast_horizon} group-sorted observation step(s) later.</p></figure>; }

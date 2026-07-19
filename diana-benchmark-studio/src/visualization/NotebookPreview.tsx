@@ -1,0 +1,2 @@
+import type { NotebookDocument } from "../generator/notebook";
+export function NotebookPreview({ notebook }: { notebook: NotebookDocument }) { return <div className="notebook-preview">{notebook.cells.map((cell, index) => <article key={cell.id}><header><span>{String(index + 1).padStart(2, "0")}</span><code>{cell.cell_type}</code><small>{cell.id}</small></header><pre>{cell.source.slice(0, 900)}{cell.source.length > 900 ? "\n…" : ""}</pre></article>)}</div>; }

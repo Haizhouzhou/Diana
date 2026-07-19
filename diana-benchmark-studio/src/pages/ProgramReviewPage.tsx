@@ -1,0 +1,7 @@
+import { Link } from "react-router-dom";
+import { ExportToolbar } from "../workspace/ExportToolbar";
+import { useStudio } from "../workspace/studio-context";
+import { NotebookPreview } from "../visualization/NotebookPreview";
+import { KitFileTree } from "../visualization/KitFileTree";
+import { DianaBrand } from "../controls/DianaBrand";
+export function ProgramReviewPage() { const { spec, lint, compiled } = useStudio(); return <main id="main-content" className="document-page review-page"><nav className="doc-nav"><div className="review-nav"><DianaBrand /><Link to="/studio">← Back to Studio</Link></div><ExportToolbar /></nav><header><p className="eyebrow">Generated program review</p><h1>{spec.project.name}</h1><p><code>{compiled?.fingerprint ?? "compiling"}</code></p></header><section className="review-summary"><div><strong>{lint.blocking.length}</strong><span>blocking issues</span></div><div><strong>{compiled?.notebook.cells.length ?? 0}</strong><span>Notebook cells</span></div><div><strong>{compiled ? Object.keys(compiled.files).length : 0}</strong><span>kit files</span></div></section>{compiled && <div className="review-columns"><section><h2>Notebook</h2><NotebookPreview notebook={compiled.notebook} /></section><section><h2>Benchmark kit</h2><KitFileTree paths={Object.keys(compiled.files)} /><h2>Manifest</h2><pre>{JSON.stringify(compiled.manifest, null, 2)}</pre></section></div>}</main>; }

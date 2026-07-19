@@ -1,0 +1,1 @@
+export function KitFileTree({ paths }: { paths: string[] }) { return <div className="kit-tree" role="tree" aria-label="Generated benchmark kit files">{paths.sort().map((path) => <code role="treeitem" key={path}>{path.replace("diana-benchmark-program/", "")}</code>)}</div>; }
