@@ -213,6 +213,24 @@ make web
 
 Open the Vite URL shown in the terminal. Vite proxies `/api` requests to FastAPI at `127.0.0.1:8000`.
 
+## Remotion Video
+
+The frontend includes a Remotion composition for a 60-second DIANA project explainer. It uses only synthetic prototype copy and aggregate benchmark language.
+
+Open Remotion Studio:
+
+```bash
+npm run video --prefix frontend
+```
+
+Render the MP4:
+
+```bash
+npm run video:render --prefix frontend
+```
+
+The rendered file is written to `frontend/out/diana-project-video.mp4` with H.264 video and AAC audio for broad MP4 player support.
+
 ## Docker
 
 Build and run one production service:
